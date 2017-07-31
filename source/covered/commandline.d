@@ -6,7 +6,7 @@ import std.algorithm : each, map, filter, joiner, sort, sum;
 import std.getopt : getopt, defaultGetoptPrinter, config;
 import std.file : exists, isDir, getcwd;
 import std.path : extension;
-import std.range : tee, chain;
+import std.range : tee, chain, enumerate;
 import std.stdio;
 
 enum MODE {
@@ -14,6 +14,7 @@ enum MODE {
 	SOURCE,
 	BLAME,
 	AVERAGE,
+	FIX,
 }
 
 int coveredMain(string[] args) {
@@ -36,6 +37,9 @@ int coveredMain(string[] args) {
 		case "average|a":
 			m_mode = MODE.AVERAGE;
 			break;
+		case "fix|f":
+			m_mode = MODE.FIX;
+			break;
 		default: assert(0);
 		}
 	}
@@ -47,6 +51,7 @@ int coveredMain(string[] args) {
 		"source|s", "Shows source code, number of executions of each line, and it's code coverage", &parseMode,
 		"blame|b", "Shows list of files ordered by code coverage", &parseMode,
 		"average|a", "Reports average code coverage across all passed files", &parseMode,
+		"fix|f", "Shows not covered parts of file", &parseMode,
 		"verbose|v", "Verbose output", &m_verbose
 	);
 
@@ -137,6 +142,29 @@ int coveredMain(string[] args) {
 			.map!(a => a.coverage)
 			.tee!(a => ++count)
 			.sum / count);
+		break;
+	case FIX:
+		size_t last;
+		m_files
+			.filter!(a => a.exists)
+			.map!(a => CoverageLoader(a))
+			.chain(m_dirs.filter!(a => a.exists).map!(a => a.openDir).joiner)
+			.filter!(a => a.coverage != float.infinity && a.coverage != 100.0f)
+			.each!((a) {
+				writeln("+-------------------");
+				writefln("| Source file: %s", a.sourceName);
+				writeln("+-------------------");
+				a.source
+					.enumerate(1)
+					.filter!(x => x[1].used && x[1].count == 0)
+					.each!((x) {
+						if(last + 1 != x[0])
+							writeln(".....|");
+						last = x[0];
+
+						"%5d| %s".writefln(x[0], x[1].source);
+					});
+			});
 		break;
 	}
 	return 0;
