@@ -11,6 +11,7 @@ enum MODE {
 	SIMPLE,
 	SOURCE,
 	BLAME,
+	AVERAGE,
 }
 
 int coveredMain(string[] args) {
@@ -30,8 +31,10 @@ int coveredMain(string[] args) {
 		case "blame":
 			m_mode = MODE.BLAME;
 			break;
-		default:
+		case "average":
+			m_mode = MODE.AVERAGE;
 			break;
+		default: assert(0);
 		}
 	}
 
@@ -41,6 +44,7 @@ int coveredMain(string[] args) {
 		"coverage|c", "Reports code coverage (default)", &parseMode,
 		"source", "Prints source code and reports code coverage", &parseMode,
 		"blame", "Prints less covered files", &parseMode,
+		"average", "Reports average code coverage across all passed files", &parseMode,
 		"verbose|v", "Verbose output", &m_verbose
 	);
 
@@ -118,6 +122,18 @@ int coveredMain(string[] args) {
 			.each!(a => m_verbose
 			       ? writefln("%-40s | %-60s | %.2f%%", a.sourceName, a.resultName, a.coverage)
 			       : writefln("%-40s | %.2f%%", a.sourceName, a.coverage));
+		break;
+	case AVERAGE:
+		size_t count;
+		"Average: %.2f%%".writefln(m_files
+			.filter!(a => a.exists)
+			.map!(a => CoverageLoader(a))
+			.chain(m_dirs.filter!(a => a.exists).map!(a => a.openDir).joiner)
+			.filter!(a => a.coverage != float.infinity)
+			.map!(a => a.coverage)
+			.tee!(a => ++count)
+			.sum / count);
+		break;
 	}
 	return 0;
 }
