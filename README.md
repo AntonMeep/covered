@@ -1,7 +1,7 @@
 Covered [![Page on DUB](https://img.shields.io/dub/v/covered.svg)](http://code.dlang.org/packages/covered) [![License](https://img.shields.io/dub/l/covered.svg)](https://github.com/ohdatboi/covered/blob/master/LICENSE)
 =============
 
-`Covered` processes output of code coverage analysis performed by the D programming language compiler (DMD/LDC/GDC).
+**Covered** processes output of code coverage analysis performed by the D programming language compiler (DMD/LDC/GDC).
 
 ## Usage:
 

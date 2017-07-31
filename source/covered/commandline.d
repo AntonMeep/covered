@@ -1,11 +1,13 @@
 module covered.commandline;
 
 import covered.loader;
-import std.stdio;
-import std.getopt;
-import std.file;
+import std.array : array;
+import std.algorithm : each, map, filter, joiner, sort, sum;
+import std.getopt : getopt, defaultGetoptPrinter, config;
+import std.file : exists, isDir, getcwd;
 import std.path : extension;
-import std.format : format;
+import std.range : tee, chain;
+import std.stdio;
 
 enum MODE {
 	SIMPLE,
@@ -58,9 +60,9 @@ int coveredMain(string[] args) {
 		return 0;
 	}
 
-	args = args[1..$];
+	args = args[1..$]; // Delete 1st argument (program name)
 
-	foreach(a; args) {
+	foreach(a; args) { // Process other arguments
 		if(a.exists) {
 			if(a.isDir) {
 				m_dirs ~= a;
@@ -68,7 +70,7 @@ int coveredMain(string[] args) {
 				if(a.extension == ".lst") {
 					m_files ~= a;
 				} else {
-					stderr.writefln("Warning: %s is not an '*.lst' file", a);
+					stderr.writefln("Warning: %s is not an '*.lst' file", a); // It is allowed to pass non-lst files, but this warning will be shown
 					m_files ~= a;
 				}
 			}
@@ -77,11 +79,8 @@ int coveredMain(string[] args) {
 		}
 	}
 
-	if(!m_files.length && !m_dirs.length)
+	if(!m_files.length && !m_dirs.length) // If nothing passed, try current working dir
 		m_dirs ~= getcwd();
-
-	import std.algorithm;
-	import std.range;
 
 	final switch(m_mode) with(MODE) {
 	case SIMPLE:

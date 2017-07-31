@@ -1,12 +1,12 @@
 module covered.loader;
 
-import std.stdio : File;
-import std.algorithm : map, each, filter, canFind, until, find, stripLeft;
-import std.range : drop, tee, isInputRange, ElementType;
-import std.typecons : Tuple, tuple;
-import std.regex : matchFirst, regex;
 import std.array : array;
+import std.algorithm : map, each, filter, canFind, until, find, stripLeft;
 import std.conv : to;
+import std.range : drop, tee, isInputRange, ElementType;
+import std.regex : matchFirst, regex;
+import std.stdio : File;
+import std.typecons : Tuple, tuple;
 
 auto openDir(string name) {
 	import std.file : exists, dirEntries, SpanMode;
@@ -19,9 +19,9 @@ auto openDir(string name) {
 }
 
 alias Line = Tuple!(
-	bool, "used",
-	size_t, "count",
-	dchar[], "source"
+	bool, "used", // True, if this line contains executable code and used in code coverage analysis
+	size_t, "count", // How many times this line is executed. 0, if `used` == `false`
+	dchar[], "source" // Line text
 );
 
 struct CoverageLoader {
@@ -72,9 +72,16 @@ struct CoverageLoader {
 		}
 	}
 
+	// Name of parsed file (*.lst)
 	auto resultName() { return m_file.name; }
+
+	// Name of source file (*.d)
 	dchar[] sourceName() { return m_sourcename; }
+
+	// File source
 	Line[] source() { return m_source; }
+
+	// Code coverage. `float.infinity`, if there is no executable code
 	float coverage() { return m_coverage; }
 }
 
