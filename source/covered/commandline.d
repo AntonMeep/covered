@@ -83,7 +83,7 @@ int coveredMain(string[] args) {
 		m_files
 			.filter!(a => a.exists)
 			.map!(a => CoverageLoader(a))
-			.chain(m_dirs.map!(a => a.openDir).joiner)
+			.chain(m_dirs.filter!(a => a.exists).map!(a => a.openDir).joiner)
 			.each!(a => a.coverage == float.infinity
 				? writefln("%s has no code", a.sourceName)
 				: writefln("%s is %.2f%% covered", a.sourceName, a.coverage));
@@ -92,7 +92,7 @@ int coveredMain(string[] args) {
 		m_files
 			.filter!(a => a.exists)
 			.map!(a => CoverageLoader(a))
-			.chain(m_dirs.map!(a => a.openDir).joiner)
+			.chain(m_dirs.filter!(a => a.exists).map!(a => a.openDir).joiner)
 			.each!((a) {
 				writeln("+-------------------");
 				writefln("| File: %s", a.resultName);
@@ -115,7 +115,7 @@ int coveredMain(string[] args) {
 		m_files
 			.filter!(a => a.exists)
 			.map!(a => CoverageLoader(a))
-			.chain(m_dirs.map!(a => a.openDir).joiner)
+			.chain(m_dirs.filter!(a => a.exists).map!(a => a.openDir).joiner)
 			.filter!(a => a.coverage != float.infinity)
 			.array
 			.sort!((a, b) => a.coverage < b.coverage)
