@@ -9,7 +9,8 @@ import std.format : format;
 
 enum MODE {
 	SIMPLE,
-	SOURCE
+	SOURCE,
+	BLAME,
 }
 
 int coveredMain(string[] args) {
@@ -20,11 +21,14 @@ int coveredMain(string[] args) {
 
 	void parseMode(string option) {
 		switch(option) {
-		case "simple|coverage|cov":
+		case "coverage":
 			m_mode = MODE.SIMPLE;
 			break;
-		case "source|view":
+		case "source":
 			m_mode = MODE.SOURCE;
+			break;
+		case "blame":
+			m_mode = MODE.BLAME;
 			break;
 		default:
 			break;
@@ -34,8 +38,9 @@ int coveredMain(string[] args) {
 	auto hlp = getopt(
 		args,
 		config.passThrough,
-		"simple|coverage|cov", "Reports code coverage (default)", &parseMode,
-		"source|view", "Prints source code and reports code coverage", &parseMode,
+		"coverage|c", "Reports code coverage (default)", &parseMode,
+		"source", "Prints source code and reports code coverage", &parseMode,
+		"blame", "Prints less covered files", &parseMode,
 		"verbose|v", "Verbose output", &m_verbose
 	);
 
@@ -62,6 +67,9 @@ int coveredMain(string[] args) {
 			stderr.writefln("Error: %s doesn't exist", a);
 		}
 	}
+
+	if(!m_files.length && !m_dirs.length)
+		m_dirs ~= getcwd();
 
 	import std.algorithm;
 	import std.range;
@@ -99,6 +107,17 @@ int coveredMain(string[] args) {
 						: x.source.writeln);
 			});
 		break;
+	case BLAME:
+		m_files
+			.filter!(a => a.exists)
+			.map!(a => CoverageLoader(a))
+			.chain(m_dirs.map!(a => a.openDir).joiner)
+			.filter!(a => a.coverage != float.infinity)
+			.array
+			.sort!((a, b) => a.coverage < b.coverage)
+			.each!(a => m_verbose
+			       ? writefln("%-40s | %-60s | %.2f%%", a.sourceName, a.resultName, a.coverage)
+			       : writefln("%-40s | %.2f%%", a.sourceName, a.coverage));
 	}
 	return 0;
 }
