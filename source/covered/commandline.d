@@ -22,16 +22,16 @@ int coveredMain(string[] args) {
 
 	void parseMode(string option) {
 		switch(option) {
-		case "coverage":
+		case "coverage|c":
 			m_mode = MODE.SIMPLE;
 			break;
-		case "source":
+		case "source|s":
 			m_mode = MODE.SOURCE;
 			break;
-		case "blame":
+		case "blame|b":
 			m_mode = MODE.BLAME;
 			break;
-		case "average":
+		case "average|a":
 			m_mode = MODE.AVERAGE;
 			break;
 		default: assert(0);
@@ -42,14 +42,19 @@ int coveredMain(string[] args) {
 		args,
 		config.passThrough,
 		"coverage|c", "Reports code coverage (default)", &parseMode,
-		"source", "Prints source code and reports code coverage", &parseMode,
-		"blame", "Prints less covered files", &parseMode,
-		"average", "Reports average code coverage across all passed files", &parseMode,
+		"source|s", "Shows source code, number of executions of each line, and it's code coverage", &parseMode,
+		"blame|b", "Shows list of files ordered by code coverage", &parseMode,
+		"average|a", "Reports average code coverage across all passed files", &parseMode,
 		"verbose|v", "Verbose output", &m_verbose
 	);
 
 	if(hlp.helpWanted) {
-		defaultGetoptPrinter("Processes output of code coverage analysis", hlp.options);
+		defaultGetoptPrinter(
+			"Usage:\tcovered <options> files dirs\n\n" ~
+			"Covered processes output of code coverage analysis performed by the D programming language compiler (DMD/LDC/GDC)\n\n" ~
+			"Every option below works with any number of files/directories specified in command line.\n" ~
+			"If nothing is specified, it looks for '*.lst' files in current working directory\n\n" ~
+			"Options:", hlp.options);
 		return 0;
 	}
 
