@@ -3,7 +3,7 @@
 	"authors": [
 		"Anton Fediushin"
 	],
-	"description": "",
+	"description": "Processes output of code coverage analysis",
 	"copyright": "Copyright © 2017, Anton Fediushin",
 	"license": "MIT"
 }
