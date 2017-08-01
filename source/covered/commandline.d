@@ -4,8 +4,9 @@ import covered.loader;
 import std.array : array;
 import std.algorithm : each, map, filter, joiner, sort, sum;
 import std.getopt : getopt, defaultGetoptPrinter, config;
-import std.file : exists, isDir, getcwd;
+import std.file : exists, isDir, getcwd, dirEntries, SpanMode;
 import std.path : extension;
+import std.parallelism : taskPool;
 import std.range : tee, chain, enumerate;
 import std.stdio;
 import std.string : rightJustify;
@@ -90,19 +91,15 @@ int coveredMain(string[] args) {
 
 	final switch(m_mode) with(MODE) {
 	case SIMPLE:
-		m_files
-			.filter!(a => a.exists)
-			.map!(a => CoverageLoader(a))
-			.chain(m_dirs.filter!(a => a.exists).map!(a => a.openDir).joiner)
+		m_files.openFilesDirs(m_dirs)
+			.map!(a => a.loadCoverage)
 			.each!(a => a.coverage == float.infinity
 				? writefln("%s has no code", a.sourceName)
 				: writefln("%s is %.2f%% covered", a.sourceName, a.coverage));
-			break;
+		break;
 	case SOURCE:
-		m_files
-			.filter!(a => a.exists)
-			.map!(a => CoverageLoader(a))
-			.chain(m_dirs.filter!(a => a.exists).map!(a => a.openDir).joiner)
+		m_files.openFilesDirs(m_dirs)
+			.map!(a => a.loadCoverage)
 			.each!((a) {
 				writeln("+-------------------");
 				writefln("| File: %s", a.resultName);
@@ -122,13 +119,11 @@ int coveredMain(string[] args) {
 			});
 		break;
 	case BLAME:
-		m_files
-			.filter!(a => a.exists)
-			.map!(a => CoverageLoader(a))
-			.chain(m_dirs.filter!(a => a.exists).map!(a => a.openDir).joiner)
-			.filter!(a => a.coverage != float.infinity)
+		taskPool
+			.map!(loadCoverage)(m_files.openFilesDirs(m_dirs))
 			.array
 			.sort!((a, b) => a.coverage < b.coverage)
+			.filter!(a => a.coverage != float.infinity)
 			.each!(a => m_verbose
 				? "%-50s | %-50s | %.2f%%".writefln(
 					a.sourceName.length > 50
@@ -146,21 +141,18 @@ int coveredMain(string[] args) {
 		break;
 	case AVERAGE:
 		size_t count;
-		"Average: %.2f%%".writefln(m_files
-			.filter!(a => a.exists)
-			.map!(a => CoverageLoader(a))
-			.chain(m_dirs.filter!(a => a.exists).map!(a => a.openDir).joiner)
-			.filter!(a => a.coverage != float.infinity)
-			.map!(a => a.coverage)
-			.tee!(a => ++count)
-			.sum / count);
+		"Average: %.2f%%"
+			.writefln(taskPool
+				.map!(loadCoverage)(m_files.openFilesDirs(m_dirs))
+				.filter!(a => a.coverage != float.infinity)
+				.map!(a => a.coverage)
+				.tee!(a => ++count)
+				.sum / count);
 		break;
 	case FIX:
 		size_t last;
-		m_files
-			.filter!(a => a.exists)
-			.map!(a => CoverageLoader(a))
-			.chain(m_dirs.filter!(a => a.exists).map!(a => a.openDir).joiner)
+		m_files.openFilesDirs(m_dirs)
+			.map!(a => a.loadCoverage)
 			.filter!(a => a.coverage != float.infinity && a.coverage != 100.0f)
 			.each!((a) {
 				writeln("+-------------------");

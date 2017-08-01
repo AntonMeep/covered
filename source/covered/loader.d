@@ -8,9 +8,19 @@ import std.regex : matchFirst, regex;
 import std.stdio : File;
 import std.typecons : Tuple, tuple;
 
-auto openDir(string name) {
+auto openFilesDirs(string[] files, string[] dirs) {
+	import std.algorithm : joiner;
 	import std.file : exists, dirEntries, SpanMode;
-	import std.path : extension;
+	import std.range : chain;
+	return files
+		.chain(dirs
+			.map!(a => a.dirEntries("[!.]*.lst", SpanMode.shallow))
+			.joiner)
+		.filter!(a => a.exists);
+}
+
+deprecated("Use openFilesDirs instead") auto openDir(string name) {
+	import std.file : exists, dirEntries, SpanMode;
 
 	assert(name.exists);
 
@@ -23,6 +33,10 @@ alias Line = Tuple!(
 	size_t, "count", // How many times this line is executed. 0, if `used` == `false`
 	dchar[], "source" // Line text
 );
+
+auto loadCoverage(string f) {
+	return CoverageLoader(f);
+}
 
 struct CoverageLoader {
 	private {
