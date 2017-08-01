@@ -1,8 +1,6 @@
 #!/bin/bash
 
-set -e
-
-echo dub test --compiler=$DC
+dub test --compiler=$DC
 
 if [ "$DC" == ldc2 ] && [ -n "$TRAVIS_TAG" ]; then
 	echo "Building $TRAVIS_TAG for $TRAVIS_OS_NAME x86_64"
