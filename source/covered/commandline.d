@@ -6,8 +6,9 @@ import std.algorithm : each, map, filter, joiner, sort, sum;
 import std.getopt : getopt, defaultGetoptPrinter, config;
 import std.file : exists, isDir, getcwd;
 import std.path : extension;
-import std.range : tee, chain, enumerate, tail;
+import std.range : tee, chain, enumerate;
 import std.stdio;
+import std.string : rightJustify;
 
 enum MODE {
 	SIMPLE,
@@ -130,10 +131,18 @@ int coveredMain(string[] args) {
 			.sort!((a, b) => a.coverage < b.coverage)
 			.each!(a => m_verbose
 				? "%-50s | %-50s | %.2f%%".writefln(
-					a.sourceName.tail(50),
-					a.resultName.tail(50),
+					a.sourceName.length > 50
+						? a.sourceName[$-50..$]
+						: a.sourceName.rightJustify(50),
+					a.resultName.length > 50
+						? a.resultName[$-50..$]
+						: a.resultName.rightJustify(50),
 					a.coverage)
-				: "%-50s | %.2f%%".writefln(a.sourceName.tail(50), a.coverage));
+				: "%-50s | %.2f%%".writefln(
+					a.sourceName.length > 50
+						? a.sourceName[$-50..$]
+						: a.sourceName.rightJustify(50),
+					a.coverage));
 		break;
 	case AVERAGE:
 		size_t count;
