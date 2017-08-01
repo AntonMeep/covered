@@ -8,6 +8,7 @@ os:
   - linux
   - os
 script: bash ./.travis.sh
+
 before_deploy:
   - export FILE_TO_UPLOAD=$(ls *.tar.gz)
 deploy:
