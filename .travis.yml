@@ -1,5 +1,12 @@
+sudo: false
 language: d
 d:
   - dmd
   - gdc
   - ldc
+
+os:
+  - linux
+  - os
+
+script: ./.travis.sh
