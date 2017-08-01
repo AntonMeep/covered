@@ -8,12 +8,14 @@ os:
   - linux
   - os
 script: bash ./.travis.sh
+before_deploy:
+  - export FILE_TO_UPLOAD=$(ls *.tar.gz)
 deploy:
   skip_cleanup: true
   provider: releases
   api_key:
     secure: DpB7dW6ED1sPMkhqtHZQC0pQI9aRNToKTZYIUEEJsnltbGo2F9lLjDAy0rAmMQpkGC7RXYMd1NMNFwXEjc1ORKOZKwBGKI6x28xWN85PA0M1UcFEUiqgOtMstyQwqFQTV6C+JVV8kMlatmyB+VNS4ytIn0BSYCMvtQjymZz4tmLSZiWWpj8gX119ekr97DeTWYpVdNTER7lxcXyapkOq+1OMQFXEeeJEC3tRPj1WtCfLIwSYS+jgPFeHkzU5XjCU1xO84dQlZt0o2gqCCCOId7RNtbWFBawZPK74Xs6pPVw7Yi3eiPiL8ubXobaN0zJEGYVxi0YebHQ6MkFA/bhbCjeasHngsjjyK1bxmBiZOyh+qE8w9ajQjGEVjfsJb9w0lTm6CfULdqg6jDegDZ58cSng1YI7rs1GJQLwMQmKuvl2k/3AlOeWCTudeIhrMS/GTCu9XRu4EcCQv7WLePszwD8O0G33GyoX4Gl3FSLRyddyHsx+aFX1bMdfvvH7XwovrN8uCR+vxAfBPddMc4ZJlVLoCR4Q5IlQ/kclkijRJrk6c1B19tjgUN6Qk7a8GNPG/vr/AJEWzgJ+XAlMjHH4yFyD5I7lIeslteXjHdFc7UEOpSqq2FrO5aA1RFs9nDU3LksZ5K+Nxl4GQ3MCyT4IIXkWmcCvdfwib+dYZVXUI8A=
   file_glob: true
-  file: "*.tar/gz"
+  file: "{FILE_TO_UPLOAD}"
   on:
     repo: ohdatboi/covered
