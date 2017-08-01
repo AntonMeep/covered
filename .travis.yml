@@ -9,4 +9,4 @@ os:
   - linux
   - os
 
-script: ./.travis.sh
+script: bash ./.travis.sh
