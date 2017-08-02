@@ -132,7 +132,7 @@ struct CoverageLoader {
 
 @("getCoveredCount(), getTotalCount() and getCoverage() produce expected results")
 unittest {
-	auto c = CoverageLoader2("sample/hello.lst");
+	auto c = CoverageLoader("sample/hello.lst");
 	c.getCoveredCount.should.be.equal(1);
 	c.getTotalCount.should.be.equal(1);
 
@@ -141,7 +141,7 @@ unittest {
 
 @("getSourceFile() returns correct file name")
 unittest {
-	CoverageLoader2("sample/hello.lst").getSourceFile.should.be.equal("hello.d");
+	CoverageLoader("sample/hello.lst").getSourceFile.should.be.equal("hello.d");
 }
 
 struct Entry {
