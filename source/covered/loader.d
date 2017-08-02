@@ -7,6 +7,7 @@ import std.range : drop, tee, isInputRange, ElementType;
 import std.regex : matchFirst, regex;
 import std.stdio : File;
 import std.typecons : Tuple, tuple;
+version(unittest) import fluent.asserts;
 
 auto openFilesDirs(string[] files, string[] dirs) {
 	import std.algorithm : joiner;
@@ -114,6 +115,8 @@ struct CoverageLoader2 {
 		File m_file;
 		char[] m_buffer;
 
+		string m_sourcefile;
+
 		bool m_coverage_computed = false;
 		float m_coverage;
 
@@ -125,21 +128,16 @@ struct CoverageLoader2 {
 
 	this(string fname) { this(File(fname, "r")); }
 
-	this(File f) {
-		m_file = f;
-	}
+	this(File f) { m_file = f; }
 
 	ByEntryRange byEntry() { return ByEntryRange(m_file); }
 
 	private void getCoveredAndTotalLines() {
 		import std.string : indexOf, stripLeft;
-		import std.conv : to;
 
 		m_buffer.reserve(4096);
 
 		m_covered = m_total = 0;
-		import std.stdio;
-		import std.experimental.logger;
 
 		while(m_file.readln(m_buffer)) {
 			immutable bar = m_buffer.indexOf('|');
@@ -186,15 +184,44 @@ struct CoverageLoader2 {
 
 		return m_coverage;
 	}
+
+	string getSourceFile() {
+		if(!m_sourcefile.length) {
+			import std.algorithm : canFind;
+
+			m_buffer.reserve(4096);
+
+			while(m_file.readln(m_buffer)) {
+				if(m_buffer.canFind('|'))
+					continue;
+
+				auto m = m_buffer.matchFirst(
+					regex(r"(.+\.d) (?:(?:is \d+% covered)|(?:has no code))"));
+
+				if(m.empty)
+					continue;
+
+				m_sourcefile = m[1].dup;
+				break;
+			}
+		}
+
+		return m_sourcefile;
+	}
 }
 
-@(".getCoveredCount, .getTotalCount and .getCoverage produce expected results")
+@("getCoveredCount(), getTotalCount() and getCoverage() produce expected results")
 unittest {
 	auto c = CoverageLoader2("sample/hello.lst");
 	c.getCoveredCount.should.be.equal(1);
 	c.getTotalCount.should.be.equal(1);
 
 	c.getCoverage.should.be.equal(100.0f);
+}
+
+@("getSourceFile() returns correct file name")
+unittest {
+	CoverageLoader2("sample/hello.lst").getSourceFile.should.be.equal("hello.d");
 }
 
 struct Entry {
@@ -248,8 +275,6 @@ struct ByEntryRange {
 		}
 	}
 }
-
-version(unittest) import fluent.asserts;
 
 @("ByElementRange produces expected results")
 unittest {
