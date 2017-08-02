@@ -100,7 +100,7 @@ int coveredMain(string[] args) {
 		m_files.openFilesAndDirs(m_dirs)
 			.each!((a) {
 				writeln("+-------------------");
-				writefln("| File: %s", a.getName);
+				writefln("| File: %s", a.getFile);
 				writefln("| Source file: %s", a.getSourceFile);
 				if(a.getCoverage == float.infinity) {
 					writefln("| Coverage: none (no code)", a.getSourceFile);
@@ -117,25 +117,24 @@ int coveredMain(string[] args) {
 			});
 		break;
 	case BLAME:
-		// taskPool
-		// 	.map!(loadCoverage)(m_files.openFilesDirs(m_dirs))
-		// 	.array
-		// 	.sort!((a, b) => a.coverage < b.coverage)
-		// 	.filter!(a => a.coverage != float.infinity)
-		// 	.each!(a => m_verbose
-		// 		? "%-50s | %-50s | %.2f%%".writefln(
-		// 			a.sourceName.length > 50
-		// 				? a.sourceName[$-50..$]
-		// 				: a.sourceName.rightJustify(50),
-		// 			a.resultName.length > 50
-		// 				? a.resultName[$-50..$]
-		// 				: a.resultName.rightJustify(50),
-		// 			a.coverage)
-		// 		: "%-50s | %.2f%%".writefln(
-		// 			a.sourceName.length > 50
-		// 				? a.sourceName[$-50..$]
-		// 				: a.sourceName.rightJustify(50),
-		// 			a.coverage));
+		m_files.openFilesAndDirs(m_dirs)
+			.filter!(a => a.getCoverage != float.infinity)
+			.array
+			.sort!((a, b) => a.getCoverage < b.getCoverage)
+			.each!(a => m_verbose
+				? "%-50s | %-50s | %.2f%%".writefln(
+					a.getSourceFile.length > 50
+						? a.getSourceFile[$-50..$]
+						: a.getSourceFile.rightJustify(50),
+					a.getFile.length > 50
+						? a.getFile[$-50..$]
+						: a.getFile.rightJustify(50),
+					a.getCoverage)
+				: "%-50s | %.2f%%".writefln(
+					a.getSourceFile.length > 50
+						? a.getSourceFile[$-50..$]
+						: a.getSourceFile.rightJustify(50),
+					a.getCoverage));
 		break;
 	case AVERAGE:
 		// size_t count;

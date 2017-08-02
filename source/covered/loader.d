@@ -130,7 +130,7 @@ struct CoverageLoader {
 		return m_sourcefile;
 	}
 
-	string getName() { return m_file.name; }
+	string getFile() { return m_file.name; }
 }
 
 @("getCoveredCount(), getTotalCount() and getCoverage() produce expected results")
@@ -145,6 +145,7 @@ unittest {
 @("getSourceFile() returns correct file name")
 unittest {
 	CoverageLoader("sample/hello.lst").getSourceFile.should.be.equal("hello.d");
+	CoverageLoader("sample/hello.lst").getFile.should.be.equal("sample/hello.lst");
 }
 
 struct Entry {
