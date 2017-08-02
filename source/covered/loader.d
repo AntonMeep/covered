@@ -9,7 +9,7 @@ import std.stdio : File;
 import std.typecons : Tuple, tuple;
 version(unittest) import fluent.asserts;
 
-auto openFilesDirs(string[] files, string[] dirs) {
+auto openFilesAndDirs(string[] files, string[] dirs) {
 	import std.algorithm : joiner;
 	import std.file : exists, dirEntries, SpanMode;
 	import std.range : chain;
@@ -39,7 +39,10 @@ struct CoverageLoader {
 
 	this(string fname) { this(File(fname, "r")); }
 
-	this(File f) { m_file = f; }
+	this(File f) {
+		m_file = f;
+		m_file.seek(0);
+	}
 
 	ByEntryRange byEntry() { return ByEntryRange(m_file); }
 
@@ -161,6 +164,7 @@ struct ByEntryRange {
 	this(File f) {
 		m_buffer.reserve(4096);
 		m_file = f;
+		m_file.seek(0);
 		this.popFront;
 	}
 

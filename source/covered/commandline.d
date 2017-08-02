@@ -91,31 +91,30 @@ int coveredMain(string[] args) {
 
 	final switch(m_mode) with(MODE) {
 	case SIMPLE:
-		m_files.openFilesDirs(m_dirs)
+		m_files.openFilesAndDirs(m_dirs)
 			.each!(a =>a.getCoverage() == float.infinity
 				? writefln("%s has no code", a.getSourceFile)
 				: writefln("%s is %.2f%% covered", a.getSourceFile, a.getCoverage));
 		break;
 	case SOURCE:
-		// m_files.openFilesDirs(m_dirs)
-		// 	.map!(a => a.loadCoverage)
-		// 	.each!((a) {
-		// 		writeln("+-------------------");
-		// 		writefln("| File: %s", a.getName);
-		// 		writefln("| Source file: %s", a.sourceFile);
-		// 		if(a.coverage == float.infinity) {
-		// 			writefln("| Coverage: none (no code)", a.sourceFile);
-		// 		} else {
-		// 			writefln("| Coverage: %.2f%%", a.getCoverage);
-		// 		}
-		// 		writeln("+-------------------");
-		// 		a.byEntry
-		// 			.each!(x => m_verbose
-		// 				? x.Used
-		// 					? "%5d|%s".writefln(x.Count, x.Source)
-		// 					: "     |%s".writefln(x.Source)
-		// 				: x.Source.writeln);
-		// 	});
+		m_files.openFilesAndDirs(m_dirs)
+			.each!((a) {
+				writeln("+-------------------");
+				writefln("| File: %s", a.getName);
+				writefln("| Source file: %s", a.getSourceFile);
+				if(a.getCoverage == float.infinity) {
+					writefln("| Coverage: none (no code)", a.getSourceFile);
+				} else {
+					writefln("| Coverage: %.2f%%", a.getCoverage);
+				}
+				writeln("+-------------------");
+				a.byEntry
+					.each!(x => m_verbose
+						? x.Used
+							? "%5d|%s".writef(x.Count, x.Source)
+							: "     |%s".writef(x.Source)
+						: x.Source.write);
+			});
 		break;
 	case BLAME:
 		// taskPool
