@@ -5,5 +5,19 @@
 	],
 	"description": "Processes output of code coverage analysis",
 	"copyright": "Copyright © 2017, Anton Fediushin",
-	"license": "MIT"
+	"license": "MIT",
+	"configurations": [
+		{ "name": "executable" },
+		{
+			"name": "unittest",
+			"targetType": "executable",
+			"mainSourceFile": "./source/app.d",
+			"dependencies": {
+				"unit-threaded": "~>0.7.28",
+				"fluent-asserts": "~>0.6.1"
+			},
+			"targetPath": ".dub/",
+			"targetName": "unittest"
+		}
+	],
 }

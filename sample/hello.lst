@@ -1,0 +1,6 @@
+       |import std.stdio;
+       |
+       |void main() {
+      1|        writeln("Hello world!");
+       |}
+hello.d is 100% covered
