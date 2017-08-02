@@ -7,7 +7,10 @@
 	"copyright": "Copyright © 2017, Anton Fediushin",
 	"license": "MIT",
 	"configurations": [
-		{ "name": "executable" },
+		{
+			"name": "executable",
+			"targetType": "executable"
+		},
 		{
 			"name": "unittest",
 			"targetType": "executable",
