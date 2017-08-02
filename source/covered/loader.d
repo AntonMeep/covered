@@ -1,16 +1,10 @@
 module covered.loader;
 
-import std.array : array;
-import std.algorithm : map, each, filter, canFind, until, find, stripLeft;
-import std.conv : to;
-import std.range : drop, tee, isInputRange, ElementType;
-import std.regex : matchFirst, regex;
 import std.stdio : File;
-import std.typecons : Tuple, tuple;
 version(unittest) import fluent.asserts;
 
 auto openFilesAndDirs(string[] files, string[] dirs) {
-	import std.algorithm : joiner;
+	import std.algorithm : map, filter, joiner;
 	import std.file : exists, dirEntries, SpanMode;
 	import std.range : chain;
 	return files
@@ -91,6 +85,8 @@ struct CoverageLoader {
 	}
 
 	float getCoverage() {
+		import std.conv : to;
+
 		if(!m_stats_available)
 			this.getCoveredAndTotalLines();
 
@@ -108,6 +104,7 @@ struct CoverageLoader {
 	string getSourceFile() {
 		if(!m_sourcefile.length) {
 			import std.algorithm : canFind;
+			import std.regex : matchFirst, regex;
 
 			m_file.seek(0);
 			m_buffer.reserve(4096);
