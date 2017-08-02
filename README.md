@@ -18,7 +18,6 @@ Options:
 -s   --source Shows source code, number of executions of each line, and it's code coverage
 -b    --blame Shows list of files ordered by code coverage
 -a  --average Reports average code coverage across all passed files
--f      --fix Shows not covered parts of file
 -v  --verbose Verbose output
 -h     --help This help information.
 ```
