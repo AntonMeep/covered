@@ -2,12 +2,11 @@ module covered.commandline;
 
 import covered.loader;
 import std.array : array;
-import std.algorithm : each, map, filter, joiner, sort, sum;
+import std.algorithm : each, map, filter, sort, sum;
 import std.getopt : getopt, defaultGetoptPrinter, config;
-import std.file : exists, isDir, getcwd, dirEntries, SpanMode;
+import std.file : exists, isDir, getcwd;
 import std.path : extension;
-import std.parallelism : taskPool;
-import std.range : tee, chain, enumerate;
+import std.range : tee;
 import std.stdio;
 import std.string : rightJustify;
 
