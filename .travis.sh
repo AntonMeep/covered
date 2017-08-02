@@ -1,6 +1,8 @@
 #!/bin/bash
 
-dub test --compiler=$DC
+if [ "$DC" != gdc ]; then
+	dub test --compiler=$DC
+fi
 
 echo "Building $(git tag -l --points-at HEAD) for $TRAVIS_OS_NAME x86_64 using $DC"
 dub build -b release --compiler=$DC
