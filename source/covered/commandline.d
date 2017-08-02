@@ -92,83 +92,82 @@ int coveredMain(string[] args) {
 	final switch(m_mode) with(MODE) {
 	case SIMPLE:
 		m_files.openFilesDirs(m_dirs)
-			.map!(a => a.loadCoverage)
-			.each!(a => a.coverage == float.infinity
-				? writefln("%s has no code", a.sourceName)
-				: writefln("%s is %.2f%% covered", a.sourceName, a.coverage));
+			.each!(a =>a.getCoverage() == float.infinity
+				? writefln("%s has no code", a.getSourceFile)
+				: writefln("%s is %.2f%% covered", a.getSourceFile, a.getCoverage));
 		break;
 	case SOURCE:
-		m_files.openFilesDirs(m_dirs)
-			.map!(a => a.loadCoverage)
-			.each!((a) {
-				writeln("+-------------------");
-				writefln("| File: %s", a.resultName);
-				writefln("| Source file: %s", a.sourceName);
-				if(a.coverage == float.infinity) {
-					writefln("| Coverage: none (no code)", a.sourceName);
-				} else {
-					writefln("| Coverage: %.2f%%", a.coverage);
-				}
-				writeln("+-------------------");
-				a.source
-					.each!(x => m_verbose
-						? x.used
-							? "%5d|%s".writefln(x.count, x.source)
-							: "     |%s".writefln(x.source)
-						: x.source.writeln);
-			});
+		// m_files.openFilesDirs(m_dirs)
+		// 	.map!(a => a.loadCoverage)
+		// 	.each!((a) {
+		// 		writeln("+-------------------");
+		// 		writefln("| File: %s", a.getName);
+		// 		writefln("| Source file: %s", a.sourceFile);
+		// 		if(a.coverage == float.infinity) {
+		// 			writefln("| Coverage: none (no code)", a.sourceFile);
+		// 		} else {
+		// 			writefln("| Coverage: %.2f%%", a.getCoverage);
+		// 		}
+		// 		writeln("+-------------------");
+		// 		a.byEntry
+		// 			.each!(x => m_verbose
+		// 				? x.Used
+		// 					? "%5d|%s".writefln(x.Count, x.Source)
+		// 					: "     |%s".writefln(x.Source)
+		// 				: x.Source.writeln);
+		// 	});
 		break;
 	case BLAME:
-		taskPool
-			.map!(loadCoverage)(m_files.openFilesDirs(m_dirs))
-			.array
-			.sort!((a, b) => a.coverage < b.coverage)
-			.filter!(a => a.coverage != float.infinity)
-			.each!(a => m_verbose
-				? "%-50s | %-50s | %.2f%%".writefln(
-					a.sourceName.length > 50
-						? a.sourceName[$-50..$]
-						: a.sourceName.rightJustify(50),
-					a.resultName.length > 50
-						? a.resultName[$-50..$]
-						: a.resultName.rightJustify(50),
-					a.coverage)
-				: "%-50s | %.2f%%".writefln(
-					a.sourceName.length > 50
-						? a.sourceName[$-50..$]
-						: a.sourceName.rightJustify(50),
-					a.coverage));
+		// taskPool
+		// 	.map!(loadCoverage)(m_files.openFilesDirs(m_dirs))
+		// 	.array
+		// 	.sort!((a, b) => a.coverage < b.coverage)
+		// 	.filter!(a => a.coverage != float.infinity)
+		// 	.each!(a => m_verbose
+		// 		? "%-50s | %-50s | %.2f%%".writefln(
+		// 			a.sourceName.length > 50
+		// 				? a.sourceName[$-50..$]
+		// 				: a.sourceName.rightJustify(50),
+		// 			a.resultName.length > 50
+		// 				? a.resultName[$-50..$]
+		// 				: a.resultName.rightJustify(50),
+		// 			a.coverage)
+		// 		: "%-50s | %.2f%%".writefln(
+		// 			a.sourceName.length > 50
+		// 				? a.sourceName[$-50..$]
+		// 				: a.sourceName.rightJustify(50),
+		// 			a.coverage));
 		break;
 	case AVERAGE:
-		size_t count;
-		"Average: %.2f%%"
-			.writefln(taskPool
-				.map!(loadCoverage)(m_files.openFilesDirs(m_dirs))
-				.filter!(a => a.coverage != float.infinity)
-				.map!(a => a.coverage)
-				.tee!(a => ++count)
-				.sum / count);
+		// size_t count;
+		// "Average: %.2f%%"
+		// 	.writefln(taskPool
+		// 		.map!(loadCoverage)(m_files.openFilesDirs(m_dirs))
+		// 		.filter!(a => a.coverage != float.infinity)
+		// 		.map!(a => a.coverage)
+		// 		.tee!(a => ++count)
+		// 		.sum / count);
 		break;
 	case FIX:
-		size_t last;
-		m_files.openFilesDirs(m_dirs)
-			.map!(a => a.loadCoverage)
-			.filter!(a => a.coverage != float.infinity && a.coverage != 100.0f)
-			.each!((a) {
-				writeln("+-------------------");
-				writefln("| Source file: %s", a.sourceName);
-				writeln("+-------------------");
-				a.source
-					.enumerate(1)
-					.filter!(x => x[1].used && x[1].count == 0)
-					.each!((x) {
-						if(last + 1 != x[0])
-							writeln(".....|");
-						last = x[0];
+		// size_t last;
+		// m_files.openFilesDirs(m_dirs)
+		// 	.map!(a => a.loadCoverage)
+		// 	.filter!(a => a.coverage != float.infinity && a.coverage != 100.0f)
+		// 	.each!((a) {
+		// 		writeln("+-------------------");
+		// 		writefln("| Source file: %s", a.sourceName);
+		// 		writeln("+-------------------");
+		// 		a.source
+		// 			.enumerate(1)
+		// 			.filter!(x => x[1].used && x[1].count == 0)
+		// 			.each!((x) {
+		// 				if(last + 1 != x[0])
+		// 					writeln(".....|");
+		// 				last = x[0];
 
-						"%5d| %s".writefln(x[0], x[1].source);
-					});
-			});
+		// 				"%5d| %s".writefln(x[0], x[1].source);
+		// 			});
+		// 	});
 		break;
 	}
 	return 0;
