@@ -1,9 +1,24 @@
+/**
+ * This module loads and parses code coverage analysis results (*.lst files)
+ * Authors: Anton Fediushin
+ * License: MIT
+ * Copyright: Copyright © 2017, Anton Fediushin
+ */
 module covered.loader;
 
 import std.stdio : File;
 version(unittest) import fluent.asserts;
 
-auto openFilesAndDirs(string[] files, string[] dirs, bool hidden = false, bool recursive = false) {
+/**
+ * Creates CoverageLoader for each file and looks for such files in each directory
+ * Params:
+ *	files = Input files
+ *	dirs = Input dirs
+ *	hidden = If `true`, looks for hidden files in directories
+ *	recursive = If `true`, goes through directory recursively
+ * Returns: A range of `CoverageLoader`.
+ */
+@trusted auto openFilesAndDirs(string[] files, string[] dirs, bool hidden = false, bool recursive = false) {
 	import std.algorithm : map, filter, joiner;
 	import std.file : exists, dirEntries, SpanMode;
 	import std.range : chain;
@@ -21,6 +36,9 @@ auto openFilesAndDirs(string[] files, string[] dirs, bool hidden = false, bool r
 		.map!(a => CoverageLoader(a));
 }
 
+/**
+ * Handles *.lst files
+ */
 struct CoverageLoader {
 	private {
 		File m_file;
@@ -37,16 +55,20 @@ struct CoverageLoader {
 		size_t m_total;
 	}
 
+	/// Opens file
 	this(string fname) { this(File(fname, "r")); }
-
+	/// ditto
 	this(File f) {
 		m_file = f;
 		m_file.seek(0);
 	}
 
-	ByEntryRange byEntry() { return ByEntryRange(m_file); }
+	/**
+	 * Creates `ByEntryRange`, which lazily iterates over input file
+	 */
+	@safe ByEntryRange byEntry() { return ByEntryRange(m_file); }
 
-	private void getCoveredAndTotalLines() {
+	@trusted private void getCoveredAndTotalLines() {
 		import std.string : indexOf, stripLeft;
 
 		m_file.seek(0);
@@ -76,21 +98,33 @@ struct CoverageLoader {
 		m_stats_available = true;
 	}
 
-	size_t getTotalCount() {
+	/**
+	 * This function reads file only once, so calling it many times doesn't result in any slowdown
+	 * Returns: Number of executable lines
+	 */
+	@safe @property size_t getTotalCount() {
 		if(!m_stats_available)
 			this.getCoveredAndTotalLines();
 
 		return m_total;
 	}
 
-	size_t getCoveredCount() {
+	/**
+	 * This function reads file only once, so calling it many times doesn't result in any slowdown
+	 * Returns: Number of lines, executed at least 1 time
+	 */
+	@safe @property size_t getCoveredCount() {
 		if(!m_stats_available)
 			this.getCoveredAndTotalLines();
 
 		return m_covered;
 	}
 
-	float getCoverage() {
+	/**
+	 * This function reads file only once, so calling it many times doesn't result in any slowdown
+	 * Returns: Code coverage in % (covered / total * 100%)
+	 */
+	@safe @property float getCoverage() {
 		import std.conv : to;
 
 		if(!m_stats_available)
@@ -107,7 +141,11 @@ struct CoverageLoader {
 		return m_coverage;
 	}
 
-	string getSourceFile() {
+	/**
+	 * This function reads file only once, so calling it many times doesn't result in any slowdown
+	 * Returns: Source file path
+	 */
+	@trusted @property string getSourceFile() {
 		if(!m_sourcefile.length) {
 			import std.algorithm : canFind;
 			import std.regex : matchFirst, regex;
@@ -133,7 +171,10 @@ struct CoverageLoader {
 		return m_sourcefile;
 	}
 
-	string getFile() { return m_file.name; }
+	/**
+	 * Returns: File name of code coverage result
+	 */
+	@safe @property pure nothrow string getFile() { return m_file.name; }
 }
 
 @("getCoveredCount(), getTotalCount() and getCoverage() produce expected results")
@@ -165,17 +206,17 @@ struct ByEntryRange {
 		char[] m_buffer;
 	}
 
-	this(File f) {
+	@trusted this(File f) {
 		m_buffer.reserve(4096);
 		m_file = f;
 		m_file.seek(0);
 		this.popFront;
 	}
 
-	@property Entry front() { return m_last; }
-	@property bool empty() { return m_empty; }
+	@safe pure @nogc nothrow @property Entry front() { return m_last; }
+	@safe pure @nogc nothrow @property bool empty() { return m_empty; }
 
-	void popFront() {
+	@trusted void popFront() {
 		import std.string : indexOf, stripLeft;
 		import std.conv : to;
 		immutable read = m_file.readln(m_buffer);
