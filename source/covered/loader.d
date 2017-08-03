@@ -3,13 +3,19 @@ module covered.loader;
 import std.stdio : File;
 version(unittest) import fluent.asserts;
 
-auto openFilesAndDirs(string[] files, string[] dirs) {
+auto openFilesAndDirs(string[] files, string[] dirs, bool hidden = false, bool recursive = false) {
 	import std.algorithm : map, filter, joiner;
 	import std.file : exists, dirEntries, SpanMode;
 	import std.range : chain;
 	return files
 		.chain(dirs
-			.map!(a => a.dirEntries("[!.]*.lst", SpanMode.shallow))
+			.map!(a => a.dirEntries(
+				hidden
+					? "*.lst"
+					: "[!.]*.lst",
+				recursive
+					? SpanMode.breadth
+					: SpanMode.shallow))
 			.joiner)
 		.filter!(a => a.exists)
 		.map!(a => CoverageLoader(a));

@@ -21,6 +21,8 @@ int coveredMain(string[] args) {
 	string[] m_files;
 	string[] m_dirs;
 	bool m_verbose;
+	bool m_hidden;
+	bool m_recursive;
 	MODE m_mode;
 
 	void parseMode(string option) {
@@ -44,11 +46,14 @@ int coveredMain(string[] args) {
 	auto hlp = getopt(
 		args,
 		config.passThrough,
+		config.bundling,
 		"coverage|c", "Reports code coverage (default)", &parseMode,
 		"source|s", "Shows source code, number of executions of each line, and it's code coverage", &parseMode,
 		"blame|b", "Shows list of files ordered by code coverage", &parseMode,
 		"average|a", "Reports average code coverage across all passed files", &parseMode,
-		"verbose|v", "Verbose output", &m_verbose
+		"verbose|v", "Verbose output", &m_verbose,
+		"hidden|h", "When directory is passed, looks for hidden files as well (default: false)", &m_hidden,
+		"recursive|r", "When directory is passed, looks for *.lst files recursively (default: false)", &m_recursive
 	);
 
 	if(hlp.helpWanted) {
@@ -85,13 +90,13 @@ int coveredMain(string[] args) {
 
 	final switch(m_mode) with(MODE) {
 	case SIMPLE:
-		m_files.openFilesAndDirs(m_dirs)
+		m_files.openFilesAndDirs(m_dirs, m_hidden, m_recursive)
 			.each!(a =>a.getCoverage() == float.infinity
 				? writefln("%s has no code", a.getSourceFile)
 				: writefln("%s is %.2f%% covered", a.getSourceFile, a.getCoverage));
 		break;
 	case SOURCE:
-		m_files.openFilesAndDirs(m_dirs)
+		m_files.openFilesAndDirs(m_dirs, m_hidden, m_recursive)
 			.each!((a) {
 				writeln("+-------------------");
 				writefln("| File: %s", a.getFile);
@@ -111,7 +116,7 @@ int coveredMain(string[] args) {
 			});
 		break;
 	case BLAME:
-		m_files.openFilesAndDirs(m_dirs)
+		m_files.openFilesAndDirs(m_dirs, m_hidden, m_recursive)
 			.filter!(a => a.getCoverage != float.infinity)
 			.array
 			.sort!((a, b) => a.getCoverage < b.getCoverage)
@@ -134,7 +139,7 @@ int coveredMain(string[] args) {
 		size_t count;
 		"Average: %.2f%%"
 			.writefln(
-				m_files.openFilesAndDirs(m_dirs)
+				m_files.openFilesAndDirs(m_dirs, m_hidden, m_recursive)
 				.filter!(a => a.getCoverage != float.infinity)
 				.map!(a => a.getCoverage)
 				.tee!(a => ++count)
