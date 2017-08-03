@@ -14,12 +14,14 @@ Every option below works with any number of files/directories specified in comma
 If nothing is specified, it looks for '*.lst' files in current working directory
 
 Options:
--c --coverage Reports code coverage (default)
--s   --source Shows source code, number of executions of each line, and it's code coverage
--b    --blame Shows list of files ordered by code coverage
--a  --average Reports average code coverage across all passed files
--v  --verbose Verbose output
--h     --help This help information.
+-c  --coverage Reports code coverage (default)
+-s    --source Shows source code, number of executions of each line, and it's code coverage
+-b     --blame Shows list of files ordered by code coverage
+-a   --average Reports average code coverage across all passed files
+-v   --verbose Verbose output
+-h    --hidden When directory is passed, looks for hidden files as well (default: false)
+-r --recursive When directory is passed, looks for *.lst files recursively (default: false)
+-h      --help This help information.
 ```
 
 ## Installation:
@@ -27,6 +29,42 @@ Options:
 ```
 $ dub fetch covered # Downloads covered
 $ dub run covered # Runs covered
+```
+
+## Available options and examples
+### `--coverage` - Prints code coverage for each passed file (default option)
+
+```
+$ ./covered sample/hello.lst
+hello.d is 100.00% covered
+```
+
+### `--source` - Shows source code, number of executions of each line and it's code coverage
+
+```
+$ ./covered --source sample/hello.lst
++-------------------
+| File: sample/hello.lst
+| Source file: hello.d
+| Coverage: 100.00%
++-------------------
+import std.stdio;
+
+void main() {
+        writeln("Hello world!");
+}
+```
+
+### `--blame` - Shows list of files ordered by coverage
+```
+$ ./covered --blame sample/hello.lst
+                                           hello.d | 100.00%
+```
+
+### `--average` - Shows average total coverage of all passed files
+```
+$ ./covered --average sample/hello.lst
+Average: 100.00%
 ```
 
 ## Performing code coverage analysis with DUB:
