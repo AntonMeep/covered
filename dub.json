@@ -17,7 +17,7 @@
 			"mainSourceFile": "./source/app.d",
 			"dependencies": {
 				"unit-threaded": "~>0.7.28",
-				"fluent-asserts": "~>0.6.1"
+				"fluent-asserts": "~>0.6.5"
 			},
 			"targetPath": ".dub/",
 			"targetName": "unittest"
