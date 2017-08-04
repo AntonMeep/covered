@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 if [ "$DC" != gdc ]; then
 	dub test --compiler=$DC
 fi
