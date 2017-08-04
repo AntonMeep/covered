@@ -20,3 +20,5 @@ deploy:
   file: "${FILE_TO_UPLOAD}"
   on:
     repo: ohdatboi/covered
+    tags: true
+    condition: "$DC = ldc2"
