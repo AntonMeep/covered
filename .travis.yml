@@ -4,13 +4,21 @@ d:
   - dmd
   - gdc
   - ldc
+
 os:
   - linux
-  - os
+  - osx
+
+matrix:
+  exclude:
+    - d: gdc
+      os: osx
+
 script: bash ./.travis.sh
 
 before_deploy:
   - export FILE_TO_UPLOAD=$(ls *.tar.gz)
+
 deploy:
   skip_cleanup: true
   provider: releases
