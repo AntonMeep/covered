@@ -1,0 +1,52 @@
+version: 1.0.{build}
+
+skip_tags: false
+
+environment:
+  matrix:
+  - DC: dmd
+    ARCH: x86
+#  - DC: dmd
+#    ARCH: x86_64
+#  - DC: ldc2
+#    ARCH: x86
+#  - DC: ldc2
+#    ARCH: x86_64
+#  - DC: gdc
+#    ARCH: x86
+#  - DC: gdc
+#    ARCH: x86_64
+install:
+  - ps: function SetUpDCompiler {
+        if($env:DC -eq "dmd") {
+          echo "*** Getting latest dmd version... ***";
+          $TempDir = [System.IO.Path]::GetTempPath();
+          Invoke-WebRequest -URI "http://downloads.dlang.org/releases/LATEST"
+            -OutFile "$($TempDir)LATEST-DMD";
+          $latest = Get-Content "$($TempDir)LATEST-DMD";
+          echo "*** $($latest) it is. Downloading... ***";
+          Invoke-WebRequest "http://downloads.dlang.org/releases/2.x/$($latest)/dmd.$($latest).windows.7z" -OutFile "$($TempDir)dmd-latest.7z";
+          echo "*** Unpacking... ***";
+          7z x "$($TempDir)dmd-latest.7z" -o"C:\\" > $null;
+          echo "*** Done! Adding it to PATH ***";
+          $env:PATH += ";C:\dmd2\windows\bin;";
+
+          echo "*** Checking dmd ***";
+          dmd --version;
+          echo "*** Checking dub ***";
+          dub --version;
+        }
+      }
+  - ps: SetUpDCompiler
+
+build_script:
+  - echo dummy
+
+test_script:
+  - ps: dub build -b debug --compiler=$env:DC --arch=$env:ARCH;
+  - ps: if($env:DC -ne "gdc") {
+          $ErrorActionPreference = "SilentlyContinue";
+          dub build -b unittest -c unittest --compiler=$env:DC --arch=$env:ARCH;
+          $ErrorActionPreference = "Continue";
+          .\.dub\unittest.exe -t -s -d;
+        }
