@@ -2,19 +2,22 @@ version: 1.0.{build}
 
 skip_tags: false
 
+image: Visual Studio 2015
+
 environment:
+  VCVARSALL: '"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall"'
   matrix:
   - DC: dmd
     ARCH: x86
-#  - DC: dmd
-#    ARCH: x86_64
+  - DC: dmd
+    ARCH: x86_64
 #  - DC: ldc2
 #    ARCH: x86
 #  - DC: ldc2
 #    ARCH: x86_64
 #  - DC: gdc
 #    ARCH: x86
-#  - DC: gdc
+#  - DC: gdc3
 #    ARCH: x86_64
 install:
   - ps: function SetUpDCompiler {
@@ -23,9 +26,10 @@ install:
           $TempDir = [System.IO.Path]::GetTempPath();
           Invoke-WebRequest -URI "http://downloads.dlang.org/releases/LATEST"
             -OutFile "$($TempDir)LATEST-DMD";
-          $latest = Get-Content "$($TempDir)LATEST-DMD";
-          echo "*** $($latest) it is. Downloading... ***";
-          Invoke-WebRequest "http://downloads.dlang.org/releases/2.x/$($latest)/dmd.$($latest).windows.7z" -OutFile "$($TempDir)dmd-latest.7z";
+          $env:DCVER = Get-Content "$($TempDir)LATEST-DMD";
+          echo "*** $($env:DCVER) it is. Downloading... ***";
+          Invoke-WebRequest "http://downloads.dlang.org/releases/2.x/$($env:DCVER)/dmd.$($env:DCVER).windows.7z"
+            -OutFile "$($TempDir)dmd-latest.7z";
           echo "*** Unpacking... ***";
           7z x "$($TempDir)dmd-latest.7z" -o"C:\\" > $null;
           echo "*** Done! Adding it to PATH ***";
@@ -38,9 +42,15 @@ install:
         }
       }
   - ps: SetUpDCompiler
+  - ps: if($env:ARCH -eq "x86") {
+        $env:VCVARS = "x86";
+      } else {
+        $env:VCVARS = "amd64";
+      }
+  - '%VCVARSALL% %VCVARS%'
 
 build_script:
-  - echo dummy
+  - ps: echo "Here we go!";
 
 test_script:
   - ps: dub build -b debug --compiler=$env:DC --arch=$env:ARCH;
