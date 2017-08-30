@@ -9,15 +9,22 @@ os:
   - linux
   - osx
 
+env:
+  - ARCH=x86_64
+
 matrix:
   exclude:
     - d: gdc
       os: osx
 
-script: bash ./.travis.sh
+script:
+  - if [ "$DC" != gdc ]; then dub test --compiler=$DC --arch=$ARCH; fi
+  - dub build -b debug --compiler=$DC --arch=$ARCH
 
 before_deploy:
-  - export FILE_TO_UPLOAD=$(ls *.tar.gz)
+  - dub build -b release --compiler=$DC --arch=$ARCH
+  - tar -zcf "covered-$TRAVIS_TAG-$TRAVIS_OS_NAME-$DC-x86_64.tar.gz" covered
+  - export FILE_TO_UPLOAD=$(ls covered-*.tar.gz)
 
 deploy:
   skip_cleanup: true
