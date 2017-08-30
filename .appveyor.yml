@@ -1,5 +1,7 @@
 version: 1.0.{build}
 
+platform: x64
+
 skip_tags: false
 
 image: Visual Studio 2015
@@ -61,7 +63,12 @@ install:
   - '%VCVARSALL% %VCVARS%'
 
 build_script:
-  - ps: echo "Here we go!";
+  - ps: if($env:DC -eq "ldc2" -and $env:APPVEYOR_REPO_TAG -eq "true") {
+        dub build -b release --compiler=$env:DC --arch=$env:ARCH;
+        $archive = "covered-$($env:APPVEYOR_REPO_TAG_NAME)-windows-$($env:DC)-$($env:ARCH).zip";
+        echo "Compressing binaries -> $($archive)";
+        7z a $archive covered.exe > $null;
+      }
 
 test_script:
   - ps: dub build -b debug --compiler=$env:DC --arch=$env:ARCH;
@@ -69,3 +76,18 @@ test_script:
         dub build -b unittest -c unittest --compiler=$env:DC --arch=$env:ARCH;
         $ErrorActionPreference = "Continue";
         .\.dub\unittest.exe -t -s -d;
+
+artifacts:
+  - path: covered-*.zip
+    name: bin
+
+deploy:
+  provider: GitHub
+  auth_token:
+    secure: "+9yH5FXyqCRKTj30Mil9a+V83mmAJq4oQqpFdUPP3Byi3XqeuH2uR4loGxfIvS6x"
+  artifact: bin
+  draft: false
+  prerelease: false
+  on:
+    DC: "ldc2"
+    appveyor_repo_tag: true
