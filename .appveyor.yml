@@ -24,9 +24,7 @@ install:
         if($env:DC -eq "dmd") {
           echo "*** Getting latest dmd version... ***";
           $TempDir = [System.IO.Path]::GetTempPath();
-          Invoke-WebRequest -URI "http://downloads.dlang.org/releases/LATEST"
-            -OutFile "$($TempDir)LATEST-DMD";
-          $env:DCVER = Get-Content "$($TempDir)LATEST-DMD";
+          $env:DCVER = Invoke-WebRequest -URI "http://downloads.dlang.org/releases/LATEST";
           echo "*** $($env:DCVER) it is. Downloading... ***";
           Invoke-WebRequest "http://downloads.dlang.org/releases/2.x/$($env:DCVER)/dmd.$($env:DCVER).windows.7z"
             -OutFile "$($TempDir)dmd-latest.7z";
