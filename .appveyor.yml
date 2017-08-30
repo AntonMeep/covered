@@ -11,19 +11,15 @@ environment:
     ARCH: x86
   - DC: dmd
     ARCH: x86_64
-#  - DC: ldc2
-#    ARCH: x86
-#  - DC: ldc2
-#    ARCH: x86_64
-#  - DC: gdc
-#    ARCH: x86
-#  - DC: gdc3
-#    ARCH: x86_64
+  - DC: ldc2
+    ARCH: x86
+  - DC: ldc2
+    ARCH: x86_64
 install:
   - ps: function SetUpDCompiler {
+        $TempDir = [System.IO.Path]::GetTempPath();
         if($env:DC -eq "dmd") {
           echo "*** Getting latest dmd version... ***";
-          $TempDir = [System.IO.Path]::GetTempPath();
           $env:DCVER = Invoke-WebRequest -URI "http://downloads.dlang.org/releases/LATEST";
           echo "*** $($env:DCVER) it is. Downloading... ***";
           Invoke-WebRequest "http://downloads.dlang.org/releases/2.x/$($env:DCVER)/dmd.$($env:DCVER).windows.7z"
@@ -35,6 +31,23 @@ install:
 
           echo "*** Checking dmd ***";
           dmd --version;
+          echo "*** Checking dub ***";
+          dub --version;
+        } elseif($env:DC -eq "ldc2") {
+          echo "*** Getting latest ldc version... ***";
+          $env:DCVER = Invoke-RestMethod "https://api.github.com/repos/ldc-developers/ldc/releases/latest"|
+            Select -Expand "tag_name" |
+            %{ $_ -Replace("^v", "") };
+          echo "*** $($env:DCVER) it is. Downloading... ***";
+          Invoke-WebRequest "https://github.com/ldc-developers/ldc/releases/download/v$($env:DCVER)/ldc2-$($env:DCVER)-win64-msvc.zip"
+            -OutFile "$($TempDir)ldc-latest.zip";
+          echo "*** Unpacking... ***";
+          7z x "$($TempDir)ldc-latest.zip" -o"C:\\" > $null;
+          echo "*** Done! Adding it to PATH ***";
+          $env:PATH += ";C:\ldc2-$($env:DCVER)-win64-msvc\bin;";
+
+          echo "*** Checking ldc ***";
+          ldc2 --version;
           echo "*** Checking dub ***";
           dub --version;
         }
@@ -52,9 +65,7 @@ build_script:
 
 test_script:
   - ps: dub build -b debug --compiler=$env:DC --arch=$env:ARCH;
-  - ps: if($env:DC -ne "gdc") {
-          $ErrorActionPreference = "SilentlyContinue";
-          dub build -b unittest -c unittest --compiler=$env:DC --arch=$env:ARCH;
-          $ErrorActionPreference = "Continue";
-          .\.dub\unittest.exe -t -s -d;
-        }
+  - ps: $ErrorActionPreference = "SilentlyContinue";
+        dub build -b unittest -c unittest --compiler=$env:DC --arch=$env:ARCH;
+        $ErrorActionPreference = "Continue";
+        .\.dub\unittest.exe -t -s -d;
