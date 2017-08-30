@@ -1,4 +1,4 @@
-Covered [![Page on DUB](https://img.shields.io/dub/v/covered.svg)](http://code.dlang.org/packages/covered) [![License](https://img.shields.io/dub/l/covered.svg)](https://github.com/ohdatboi/covered/blob/master/LICENSE) [![Build Status](https://travis-ci.org/ohdatboi/covered.svg?branch=master)](https://travis-ci.org/ohdatboi/covered)
+Covered [![Page on DUB](https://img.shields.io/dub/v/covered.svg)](http://code.dlang.org/packages/covered)[![License](https://img.shields.io/dub/l/covered.svg)](https://github.com/ohdatboi/covered/blob/master/LICENSE)[![Build Status](https://travis-ci.org/ohdatboi/covered.svg?branch=master)](https://travis-ci.org/ohdatboi/covered)[![Build status](https://ci.appveyor.com/api/projects/status/ajunohwnu9bleuk2?svg=true)](https://ci.appveyor.com/project/ohdatboi/covered)
 =============
 
 **Covered** processes output of code coverage analysis performed by the D programming language compiler (DMD/LDC/GDC).
