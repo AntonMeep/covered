@@ -15,6 +15,7 @@ enum MODE {
 	SOURCE,
 	BLAME,
 	AVERAGE,
+	JSON,
 }
 
 int coveredMain(string[] args) {
@@ -39,6 +40,9 @@ int coveredMain(string[] args) {
 		case "average|a":
 			m_mode = MODE.AVERAGE;
 			break;
+		case "json|j":
+			m_mode = MODE.JSON;
+			break;
 		default: assert(0);
 		}
 	}
@@ -51,6 +55,7 @@ int coveredMain(string[] args) {
 		"source|s", "Shows source code, number of executions of each line, and it's code coverage", &parseMode,
 		"blame|b", "Shows list of files ordered by code coverage", &parseMode,
 		"average|a", "Reports average code coverage across all passed files", &parseMode,
+		"json|j", "Makes a dump in JSON format", &parseMode,
 		"verbose|v", "Verbose output", &m_verbose,
 		"hidden|h", "When directory is passed, looks for hidden files as well (default: false)", &m_hidden,
 		"recursive|r", "When directory is passed, looks for *.lst files recursively (default: false)", &m_recursive
@@ -145,6 +150,27 @@ int coveredMain(string[] args) {
 				.tee!(a => ++count)
 				.sum / count);
 		break;
+	case JSON:
+		import std.json : JSONValue;
+		m_files.openFilesAndDirs(m_dirs, m_hidden, m_recursive)
+			.map!(a => JSONValue([
+				"entries": JSONValue(a.byEntry
+					.map!(x => JSONValue([
+						"used": JSONValue(x.Used),
+						"count": JSONValue(x.Count),
+						"source": JSONValue(x.Source),
+					])).array),
+				"total": JSONValue(a.getTotalCount),
+				"covered": JSONValue(a.getCoveredCount),
+				"coverage": a.getCoverage != float.infinity
+					? JSONValue(a.getCoverage)
+					: JSONValue(null),
+				"sourceFile": JSONValue(a.getSourceFile),
+				"file": JSONValue(a.getFile),
+			]))
+			.array
+			.JSONValue
+			.writeln;
 	}
 	return 0;
 }
