@@ -57,7 +57,7 @@ int coveredMain(string[] args) {
 		"average|a", "Reports average code coverage across all passed files", &parseMode,
 		"json|j", "Makes a dump in JSON format", &parseMode,
 		"verbose|v", "Verbose output", &m_verbose,
-		"hidden|h", "When directory is passed, looks for hidden files as well (default: false)", &m_hidden,
+		"hidden|n", "When directory is passed, looks for hidden files as well (default: false)", &m_hidden,
 		"recursive|r", "When directory is passed, looks for *.lst files recursively (default: false)", &m_recursive
 	);
 
