@@ -20,7 +20,7 @@ Options:
 -a   --average Reports average code coverage across all passed files
 -j      --json Makes a dump in JSON format
 -v   --verbose Verbose output
--h    --hidden When directory is passed, looks for hidden files as well (default: false)
+-n    --hidden When directory is passed, looks for hidden files as well (default: false)
 -r --recursive When directory is passed, looks for *.lst files recursively (default: false)
 -h      --help This help information.
 ```
