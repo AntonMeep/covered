@@ -18,6 +18,7 @@ Options:
 -s    --source Shows source code, number of executions of each line, and it's code coverage
 -b     --blame Shows list of files ordered by code coverage
 -a   --average Reports average code coverage across all passed files
+-j      --json Makes a dump in JSON format
 -v   --verbose Verbose output
 -h    --hidden When directory is passed, looks for hidden files as well (default: false)
 -r --recursive When directory is passed, looks for *.lst files recursively (default: false)
