@@ -16,8 +16,8 @@
 			"targetType": "executable",
 			"mainSourceFile": "./source/app.d",
 			"dependencies": {
-				"unit-threaded": "~>0.7.28",
-				"fluent-asserts": "~>0.6.5"
+				"unit-threaded": "~>0.7.29",
+				"fluent-asserts": "~>0.6.6"
 			},
 			"targetPath": ".dub/",
 			"targetName": "unittest"
