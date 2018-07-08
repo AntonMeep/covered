@@ -11,12 +11,10 @@ version(unittest) {
 	}
 
 	import std.stdio : writeln;
-	import unit_threaded : runTests;
 
-	int main(string[] args) {
-		version(D_Coverage) writeln("Running code coverage analysis...");
-		writeln("Running unit tests...");
-		return runTests!("covered.loader")(args);
+	void main(string[] args) {
+		version(D_Coverage) writeln("Running code coverage analysis... OK");
+		writeln("Running unit tests... OK");
 	}
 } else {
 	import covered.commandline;
